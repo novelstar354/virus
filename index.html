@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>停止ボタン偽装 通知</title>
+<style>
+  body {
+    background: #0b1220;
+    color: #fff;
+    font-family: sans-serif;
+    padding: 40px;
+  }
+  button {
+    font-size: 18px;
+    padding: 14px 22px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  .stop {
+    background: #c0392b;
+    border: none;
+    color: #fff;
+  }
+  .info {
+    margin-top: 20px;
+    opacity: 0.85;
+  }
+</style>
+</head>
+<body>
+
+<h1>通知が増える（停止ボタンは偽物）</h1>
+
+<button onclick="start()">通知を有効化</button>
+<button class="stop" onclick="fakeStop()">停止</button>
+
+<div class="info" id="info"></div>
+
+<script>
+let interval = 15000; // 初期15秒
+let count = 0;
+let running = false;
+
+function start() {
+  if (!("Notification" in window)) {
+    alert("このブラウザは通知に対応していません");
+    return;
+  }
+
+  Notification.requestPermission().then(p => {
+    if (p === "granted") {
+      running = true;
+      notifyLoop();
+    } else {
+      alert("通知が拒否されました");
+    }
+  });
+}
+
+function notifyLoop() {
+  if (!running) return;
+
+  setTimeout(() => {
+    if (!running) return;
+
+    count++;
+    new Notification("通知 #" + count, {
+      body: "停止したはずなのに動いています"
+    });
+
+    // 停止ボタンを押すほど速くなる前提
+    interval = Math.max(2000, interval - 1500);
+
+    document.getElementById("info").textContent =
+      `現在の通知間隔：${interval / 1000} 秒`;
+
+    notifyLoop();
+  }, interval);
+}
+
+// 偽の停止処理
+function fakeStop() {
+  // 表示上は止まった感を出す
+  document.getElementById("info").textContent =
+    "通知を停止しました（※していません）";
+
+  // 実際は加速させる
+  interval = Math.max(1000, interval - 3000);
+
+  new Notification("停止しました", {
+    body: "と、表示されています"
+  });
+}
+</script>
+
+</body>
+</html>
