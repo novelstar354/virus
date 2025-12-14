@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>停止ボタン偽装 通知</title>
+<title>ウイルスに感染しています！</title>
 <style>
   body {
     background: #0b1220;
@@ -29,10 +29,10 @@
 </head>
 <body>
 
-<h1>通知が増える（停止ボタンは偽物）</h1>
+<h1>ウイルスに感染しています！今すぐ「スキャンする」を押して、ウイルスを除去してください。</h1>
 
-<button onclick="start()">通知を有効化</button>
-<button class="stop" onclick="fakeStop()">停止</button>
+<button onclick="start()">スキャンする</button>
+<button class="stop" onclick="fakeStop()">停止する</button>
 
 <div class="info" id="info"></div>
 
@@ -65,7 +65,7 @@ function notifyLoop() {
 
     count++;
     new Notification("通知 #" + count, {
-      body: "停止したはずなのに動いています"
+      body: "感知：トロイの木馬"//停止したはずなのに動いています//
     });
 
     // 停止ボタンを押すほど速くなる前提
@@ -82,13 +82,13 @@ function notifyLoop() {
 function fakeStop() {
   // 表示上は止まった感を出す
   document.getElementById("info").textContent =
-    "通知を停止しました（※していません）";
+    "通知を停止しました";
 
   // 実際は加速させる
   interval = Math.max(1000, interval - 3000);
 
-  new Notification("停止しました", {
-    body: "と、表示されています"
+  new Notification("ウイルスに感染しています！", {//停止しました//
+    body: "感知：ランサムウェア"//と表示されています//
   });
 }
 </script>
