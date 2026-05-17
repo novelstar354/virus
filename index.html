@@ -34,12 +34,28 @@
 <button onclick="start()">スキャンする</button>
 <button class="stop" onclick="fakeStop()">停止する</button>
 
-<div class="info" id="info"></div>
+<!--<div class="info" id="info"></div>-->
 
 <script>
 let interval = 150; // 初期15秒
 let count = 0;
 let running = false;
+const virus = [
+    "トロイの木馬",
+    "ランサムウェア",
+    "ボット",
+    "マクロウイルス",
+    "コンピュータウイルス",
+    "ワーム",
+    "スパイウェア",
+    "RAT",
+    "バックドア",
+    "キーロガー",
+    "ルートキット",
+    "ワイパー",
+    "スケアウェア",
+    "ファイルレスマルウェア",
+];
 
 function start() {
   if (!("Notification" in window)) {
@@ -58,6 +74,8 @@ function start() {
 }
 
 function notifyLoop() {
+    let randomVirus = Math.floor(Math.random()* 14);
+let currentVirus = virus[randomVirus];
   if (!running) return;
 
   setTimeout(() => {
@@ -65,7 +83,7 @@ function notifyLoop() {
 
     count++;
     new Notification("通知 #" + count, {
-      body: "感知：トロイの木馬"//停止したはずなのに動いています//
+      body: `{感知：${currentVirus}`//停止したはずなのに動いています//もとはトロイの木馬
     });
 
     // 停止ボタンを押すほど速くなる前提
@@ -80,6 +98,8 @@ function notifyLoop() {
 
 // 偽の停止処理
 function fakeStop() {
+    let randomVirus2 = Math.floor(Math.random()* 14);
+let currentVirus2 = virus[randomVirus2];
   // 表示上は止まった感を出す
   document.getElementById("info").textContent =
     "スキャンを停止しました";
@@ -88,7 +108,7 @@ function fakeStop() {
   interval = Math.max(1000, interval - 3000);
 
   new Notification("ウイルスに感染しています！", {//停止しました//
-    body: "感知：ランサムウェア"//と表示されています//
+    body: `感知：${currentVirus2}`//と表示されています//もとはランサムウェア
   });
 }
 </script>
