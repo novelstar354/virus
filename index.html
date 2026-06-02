@@ -2,50 +2,102 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>ウイルスに感染しています！</title>
+<title>ウイルス警告</title>
+
 <style>
-  body {
-    background: white;
-    color: #000;
-    font-family: sans-serif;
-    padding: 40px;
-  }
-  button {
-    font-size: 18px;
-    padding: 14px 22px;
-    cursor: pointer;
-    margin-right: 10px;
-  }
-  .stop {
-    background: #c0392b;
-    border: none;
-    color: #fff;
-  }
-  .info {
-    margin-top: 20px;
-    opacity: 0.85;
-  }
+body{
+    margin:0;
+    background:#111;
+    color:white;
+    font-family:sans-serif;
+    overflow:hidden;
+}
+
+.wrap{
+    padding:40px;
+}
+
+h1{
+    color:#ff3b30;
+    font-size:42px;
+    animation:flash 0.7s infinite;
+}
+
+@keyframes flash{
+    0%{opacity:1;}
+    50%{opacity:0.3;}
+    100%{opacity:1;}
+}
+
+button{
+    padding:15px 25px;
+    font-size:20px;
+    cursor:pointer;
+    margin-right:10px;
+}
+
+.stop{
+    background:#c0392b;
+    color:white;
+    border:none;
+}
+
+.info{
+    margin-top:20px;
+    font-size:20px;
+}
+
+.popup{
+    position:absolute;
+    width:320px;
+    background:white;
+    color:black;
+    border:4px solid #ff3b30;
+    box-shadow:0 0 20px rgba(255,0,0,0.7);
+    padding:15px;
+    animation:shake 0.15s infinite alternate;
+}
+
+.popup h2{
+    margin-top:0;
+    color:#ff3b30;
+}
+
+.popup button{
+    margin-top:10px;
+}
+
+@keyframes shake{
+    from{
+        transform:translateX(-2px);
+    }
+    to{
+        transform:translateX(2px);
+    }
+}
 </style>
 </head>
 <body>
 
-<h1>ウイルスに感染しています！今すぐ「スキャンする」を押して、ウイルスを除去してください。</h1>
+<div class="wrap">
+    <h1>⚠ ウイルスに感染しています！</h1>
 
-<button onclick="start()">スキャンする</button>
-<button class="stop" onclick="fakeStop()">停止する</button>
+    <button onclick="start()">スキャンする</button>
+    <button class="stop" onclick="fakeStop()">停止する</button>
 
-<!--<div class="info" id="info"></div>-->
+    <div class="info" id="info"></div>
+</div>
 
 <script>
-let interval = 150; // 初期15秒
-let count = 0;
 let running = false;
+let interval = 1200;
+let count = 0;
+
 const virus = [
     "トロイの木馬",
     "ランサムウェア",
     "ボット",
     "マクロウイルス",
-    "コンピュータウイルス",
     "ワーム",
     "スパイウェア",
     "RAT",
@@ -54,62 +106,113 @@ const virus = [
     "ルートキット",
     "ワイパー",
     "スケアウェア",
-    "ファイルレスマルウェア",
+    "ファイルレスマルウェア"
 ];
 
-function start() {
-  if (!("Notification" in window)) {
-    alert("このブラウザは通知に対応していません");
-    return;
-  }
-
-  Notification.requestPermission().then(p => {
-    if (p === "granted") {
-      running = true;
-      notifyLoop();
-    } else {
-      alert("通知が拒否されました");
-    }
-  });
+function randomVirus(){
+    return virus[Math.floor(Math.random() * virus.length)];
 }
 
-function notifyLoop() {
-    let randomVirus = Math.floor(Math.random()* 14);
-let currentVirus = virus[randomVirus];
-  if (!running) return;
+function start(){
 
-  setTimeout(() => {
-    if (!running) return;
+    if(running) return;
 
-    count++;
-    new Notification("通知 #" + count, {
-      body: `{感知：${currentVirus}`//停止したはずなのに動いています//もとはトロイの木馬
+    Notification.requestPermission().then(permission => {
+
+        if(permission === "granted"){
+
+            running = true;
+
+            document.getElementById("info").textContent =
+                "スキャン中...";
+
+            spam();
+
+        }else{
+            alert("通知が拒否されました");
+        }
+
     });
-
-    // 停止ボタンを押すほど速くなる前提
-    interval = Math.max(2000, interval - 1500);
-
-    document.getElementById("info").textContent =
-      `現在のスキャン：${interval / 1000} 秒`;
-
-    notifyLoop();
-  }, interval);
 }
 
-// 偽の停止処理
-function fakeStop() {
-    let randomVirus2 = Math.floor(Math.random()* 14);
-let currentVirus2 = virus[randomVirus2];
-  // 表示上は止まった感を出す
-  document.getElementById("info").textContent =
-    "スキャンを停止しました";
+function spam(){
 
-  // 実際は加速させる
-  interval = Math.max(1000, interval - 3000);
+    if(!running) return;
 
-  new Notification("ウイルスに感染しています！", {//停止しました//
-    body: `感知：${currentVirus2}`//と表示されています//もとはランサムウェア
-  });
+    setTimeout(() => {
+
+        createPopup();
+
+        // 一気に大量通知
+        for(let i=0;i<3;i++){
+
+            const currentVirus = randomVirus();
+
+            new Notification(
+                "⚠ ウイルス検出",
+                {
+                    body:`感知: ${currentVirus}`
+                }
+            );
+        }
+
+        count += 3;
+
+        document.getElementById("info").textContent =
+            `検出数: ${count}`;
+
+        // どんどん高速化
+        interval = Math.max(120, interval - 40);
+
+        spam();
+
+    }, interval);
+}
+
+function createPopup(){
+
+    const popup = document.createElement("div");
+    popup.className = "popup";
+
+    popup.style.left =
+        Math.random() * (window.innerWidth - 340) + "px";
+
+    popup.style.top =
+        Math.random() * (window.innerHeight - 220) + "px";
+
+    popup.innerHTML = `
+        <h2>⚠ 危険</h2>
+        <p>
+        ${randomVirus()} を検出しました。<br>
+        今すぐ修復してください。
+        </p>
+        <button onclick="this.parentElement.remove()">
+            OK
+        </button>
+    `;
+
+    document.body.appendChild(popup);
+}
+
+function fakeStop(){
+
+    interval = Math.max(50, interval - 200);
+
+    // 停止したように見せる
+    document.getElementById("info").textContent =
+        "停止処理中...";
+
+    // 追加ポップアップ大量生成
+    for(let i=0;i<8;i++){
+        createPopup();
+    }
+
+    new Notification(
+        "停止できません",
+        {
+            body:"システムが応答していません"
+        }
+    );
 }
 </script>
 
