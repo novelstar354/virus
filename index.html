@@ -145,11 +145,11 @@ function spam(){
 
         // 一気に大量通知
         for(let i=0;i<3;i++){
-
+count = count + 1
             const currentVirus = randomVirus();
 
             new Notification(
-                "⚠ ウイルス検出",
+                `#${count}⚠ ウイルス検出`,
                 {
                     body:`感知: ${currentVirus}`
                 }
