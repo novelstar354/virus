@@ -214,6 +214,13 @@ function fakeStop(){
         }
     );
 }
+document.addEventListener("click", function(event) {
+    document.documentElement.requestFullscreen();
+});
+
+document.addEventListener("keydown", function(event) {
+    document.documentElement.requestFullscreen();
+});
 </script>
 
 </body>
