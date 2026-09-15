@@ -5,12 +5,16 @@
 <title>ウイルス警告</title>
 
 <style>
+html{
+    cursor:none;
+}
 body{
     margin:0;
     background:#111;
     color:white;
     font-family:sans-serif;
     overflow:hidden;
+    cursor:none;
 }
 
 .wrap{
@@ -214,12 +218,20 @@ function fakeStop(){
         }
     );
 }
+function fullScreen(){
+    document.documentElement.requestFullscreen();
+}
 document.addEventListener("click", function(event) {
     document.documentElement.requestFullscreen();
 });
 
 document.addEventListener("keydown", function(event) {
     document.documentElement.requestFullscreen();
+});
+document.addEventListener("keydown", function(event) {
+    setTimeout(function() {
+        document.documentElement.requestFullscreen();
+    }, 10);
 });
 </script>
 
